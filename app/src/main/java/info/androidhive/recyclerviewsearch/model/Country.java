@@ -25,12 +25,23 @@ public class Country {
     @SerializedName("capital")
     @Expose
     private String capital;
+    @SerializedName("area")
+    @Expose
+    private String area;
     @SerializedName("latlng")
     @Expose
-    private List<Double> latlng = null;
+    private List<String> latlng = null;
 
-    public List<Double> getLatlng() {
-        return latlng;
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public List<String> getLatlng() {
+            return latlng;
     }
 
     public String getFlag() {

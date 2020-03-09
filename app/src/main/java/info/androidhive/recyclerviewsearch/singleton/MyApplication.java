@@ -1,6 +1,10 @@
 package info.androidhive.recyclerviewsearch.singleton;
 
 
+/**
+ * Klasa singlova u kojoj se pokreće volej.
+ *
+ * **/
 
 import android.app.Application;
 import android.text.TextUtils;

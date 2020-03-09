@@ -2,6 +2,7 @@ package info.androidhive.recyclerviewsearch.activites;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +17,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -41,15 +44,24 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
     private List<Country> countryList;
     private CountryAdapter mAdapter;
     private SearchView searchView;
-    private Context context;
+    private Button Favorites;
 
-    // url to fetch counttries json
+    //Dohvaćanje podataka RESTCOUNTRIES
     private static final String URL = "https://restcountries.eu/rest/v2";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Favorites=findViewById(R.id.favoriti);
+        Favorites.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i =new Intent(v.getContext(),FavoriteActivity.class);
+                startActivity(i);
+            }
+        });
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -69,14 +81,15 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new MyDividerItemDecoration(this, DividerItemDecoration.VERTICAL, 36));
         recyclerView.setAdapter(mAdapter);
+        fetchCountries();
 
-        fetchContacts();
     }
 
     /**
-     * fetches json by making http calls
+     * Zahtijev Volley za dohvaćanje API-a
+     * Pretraživanje se vrši preko Gson-a, te se dodaje na popis
      */
-    private void fetchContacts() {
+    private void fetchCountries() {
         JsonArrayRequest request = new JsonArrayRequest(URL,
                 new Response.Listener<JSONArray>() {
                     @Override
@@ -85,18 +98,16 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
                             Toast.makeText(getApplicationContext(), "Couldn't fetch the countries! Pleas try again.", Toast.LENGTH_LONG).show();
                             return;
                         }
-
                         List<Country> items = new Gson().fromJson(response.toString(), new TypeToken<List<Country>>() {
                         }.getType());
 
-
-                        //countryList.clear();
                         countryList.addAll(items);
-
                         // refreshing recycler view
                         mAdapter.notifyDataSetChanged();
                     }
-                }, new Response.ErrorListener() {
+                },
+                new Response.ErrorListener()
+                {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // error in getting json
@@ -107,17 +118,20 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
         MyApplication.getInstance().addToRequestQueue(request);
     }
 
+    /**
+     *Prikaz SearcView-a
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        // Associate searchable configuration with the SearchView
+        //Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
-        // listening to search query text change
+        // Preslušava promjene znakova dok korisnik upisuje podneseno pretraživanje.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -138,7 +152,8 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+        // Upravljanje stavkom radne trake.
+        // The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
@@ -171,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements CountryAdapter.Co
     }
 
     @Override
-    public void onContactSelected(Country country)
+    public void onCountrySelected(Country country)
     {
-        Toast.makeText(getApplicationContext(), "Selected: " + country.getName() + ", " + country.getCapital(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Selected: " + country.getName(), Toast.LENGTH_LONG).show();
     }
 }
